@@ -5,10 +5,13 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
+
+    protected static ?string $password;
 
     /**
      * Seed the application's database.
@@ -20,6 +23,9 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'brandon',
             'email' => 'test@example.com',
+            'password' => static::$password ??= Hash::make('password'),
         ]);
+
+        \App\Models\Project::factory(5)->create();
     }
 }
