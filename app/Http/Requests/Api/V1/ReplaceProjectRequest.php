@@ -5,7 +5,7 @@ namespace App\Http\Requests\Api\V1;
 use Illuminate\Contracts\Validation\ValidationRule;
 use App\Http\Requests\Api\V1\BaseProjectRequest;
 
-class StoreProjectRequest extends BaseProjectRequest
+class ReplaceProjectRequest extends BaseProjectRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreProjectRequest;
 use App\Http\Requests\Api\V1\UpdateProjectRequest;
+use App\Http\Requests\Api\V1\ReplaceProjectRequest;
 use App\Http\Resources\V1\ProjectResource;
 use App\Models\Project;
 use App\Models\User;
 use App\ApiResponses;
+use App\Http\Filters\V1\ProjectFilter;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProjectController extends ApiController
@@ -17,17 +18,10 @@ class ProjectController extends ApiController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(ProjectFilter $filters)
     {
-        return ProjectResource::collection( Project::all() );
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return ProjectResource::collection(Project::filter($filters)->paginate());
     }
 
     /**
@@ -36,7 +30,7 @@ class ProjectController extends ApiController
     public function store(StoreProjectRequest $request)
     {
         try {
-            $user = User::findOrFail($request->input('data.relationships.author.data.id'));
+            $user = User::findOrFail($request->input('data.relationships.admin.data.id'));
         }
         catch (ModelNotFoundException $exception) {
             return $this->ok('user not found', [
@@ -44,29 +38,21 @@ class ProjectController extends ApiController
             ]);
         }
 
-        $model = [
-            'title' => $request->input('data.attributes.title'),
-            'feature_image' => $request->input('data.attributes.feature_image'),
-            'description' => $request->input('data.attributes.description'),
-            'tech_stack' => $request->input('data.attributes.tech_stack'),
-            'github_url' => $request->input('data.attributes.github_url'),
-        ];
-
-        return new ProjectResource(Project::create($model));
+        return new ProjectResource($request->mappedAttributes());
 
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($project_id)
+    public function show(int $project_id)
     {
 
         try {
             $project = Project::findOrFail($project_id);
 
-            if ($this->include('author')) {
-                return new ProjectResource($project->load('user'));
+            if ($this->include('admin')) {
+                return new ProjectResource($project->load('admin'));
             }
 
             return new ProjectResource($project);
@@ -88,15 +74,41 @@ class ProjectController extends ApiController
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProjectRequest $request, Project $project)
+    public function update(UpdateProjectRequest $request, int $project_id)
     {
-        //
+        try {
+            $project = Project::findOrFail($project_id);
+
+            $project->update($request->mappedAttributes());
+
+            return new ProjectResource($project);
+        }
+        catch (ModelNotFoundException $exception) {
+            return $this->error('Project Not Found', 404);
+        }
+    }
+
+     /**
+     * Update the specified resource in storage.
+     */
+    public function replace(ReplaceProjectRequest $request, int $project_id)
+    {
+        try {
+            $project = Project::findOrFail($project_id);
+
+            $project->update($request->mappedAttributes());
+
+            return new ProjectResource($project);
+        }
+        catch (ModelNotFoundException $exception) {
+            return $this->error('Project Not Found', 404);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($project_id)
+    public function destroy(int $project_id)
     {
         try {
             $project = Project::findOrFail($project_id);

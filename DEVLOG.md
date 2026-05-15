@@ -64,10 +64,14 @@ Implement CRUD Functionality for Projects
 
 The project can request GET ALL projects as well as a single GET \
 Projects can now be POSTED to the database using POST request \
-Projects can be DELETED using a DELETE request
+Projects can be DELETED using a DELETE request 
+Added a base class for my Project Request child class files.
+Projects can now be PUT and PATCHED
+Modified Project Migration by adding foreign key for user id
 
 ### Files
 
 ProjectController.php \
 Project.php \
-ApiController.php 
+ApiController.php \
+api_v1.php

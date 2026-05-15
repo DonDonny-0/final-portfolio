@@ -30,7 +30,7 @@ class ProjectResource extends JsonResource
                 'updatedAt' => $this->updated_at
             ],
             'relationships' => [
-                'author' => [
+                'admin' => [
                     'data' => [
                         'type' => 'user',
                         'id' => $this->id,
@@ -40,7 +40,7 @@ class ProjectResource extends JsonResource
                     ]
                 ]
             ],
-            'includes' => new UserResource($this->whenLoaded('user')),
+            'includes' => new UserResource($this->whenLoaded('admin')),
             'links' => [
                 ['self' => route('projects.show', ['project' => $this->id])],
             ],

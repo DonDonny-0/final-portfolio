@@ -1,13 +1,12 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Models\Project;
-use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\V1\ProjectController;
-use App\Http\Controllers\Api\V1\UsersController;
+use App\Http\Controllers\Api\V1\AdminController;
 
-Route::prefix('v1')->group(function () {
-    Route::middleware('auth:sanctum')->apiResource('projects', ProjectController::class);
-    Route::middleware('auth:sanctum')->apiResource('user', UsersController::class);
+Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+    Route::apiResource('projects', ProjectController::class)->except(['update']);
+    Route::put('projects/{project}', [ProjectController::class, 'replace']);
+    Route::patch('projects/{project}', [ProjectController::class, 'update']);
+    Route::apiResource('admin', AdminController::class);
 });

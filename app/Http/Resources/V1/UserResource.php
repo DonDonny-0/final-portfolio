@@ -20,15 +20,19 @@ class UserResource extends JsonResource
             'attributes' => [
                 'name' => $this->name,
                 'email' => $this->email,
-                $this->mergeWhen($request->routeIs('users.*'), [
+                $this->mergeWhen($request->routeIs('admin.*'), [
                     'emailVerifiedAt' => $this->email_verified_at,
                     'createdAt' => $this->created_at,
                     'updatedAt' => $this->updated_at,
                 ]),
                 'emailVerifiedAt' => $this->when(
-                    $request->routeIs('users.*'),
+                    $request->routeIs('admin.*'),
                     $this->email_verified_at
                 )
+            ],
+            'includes' => ProjectResource::collection($this->whenLoaded('projects')),
+            'links' => [
+                'self' => route('admin.show', ['admin' => $this->id])
             ]
         ];
     }
