@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreProjectRequest;
 use App\Http\Requests\Api\V1\UpdateProjectRequest;
+use App\Http\Resources\V1\ProjectResource;
 use App\Models\Project;
+use App\ApiResponses;
 
 class ProjectController extends Controller
 {
@@ -14,7 +16,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        return Project::all();
+        return ProjectResource::collection( Project::all() );
     }
 
     /**
@@ -30,7 +32,15 @@ class ProjectController extends Controller
      */
     public function store(StoreProjectRequest $request)
     {
-        //
+        try {
+            $user = User::findOrFail($request->input('data.relationships.author.id'));
+        }
+        catch (ModelNotFoundException $exception) {
+            return $this->ok('user not found', [
+                'error' => 'provided userid does not exist',
+            ]);
+        }
+
     }
 
     /**
@@ -38,7 +48,7 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        //
+        return new ProjectResource($project);
     }
 
     /**

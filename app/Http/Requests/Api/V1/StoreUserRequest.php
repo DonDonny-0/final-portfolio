@@ -5,14 +5,14 @@ namespace App\Http\Requests\Api\V1;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreProjectRequest extends FormRequest
+class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -23,11 +23,7 @@ class StoreProjectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'data.attributes.title' => 'required|string',
-            'data.attributes.feature_image' => 'required|string',
-            'data.attributes.description' => 'required|string',
-            'data.attributes.tech_stack' => 'required|array',
-            'data.attributes.github_url' => 'required|string',
+            //
         ];
     }
 }
