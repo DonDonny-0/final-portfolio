@@ -7,10 +7,13 @@ use App\Http\Requests\Api\V1\StoreProjectRequest;
 use App\Http\Requests\Api\V1\UpdateProjectRequest;
 use App\Http\Resources\V1\ProjectResource;
 use App\Models\Project;
+use App\Models\User;
 use App\ApiResponses;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class ProjectController extends Controller
+class ProjectController extends ApiController
 {
+    use ApiResponses;
     /**
      * Display a listing of the resource.
      */
@@ -33,22 +36,45 @@ class ProjectController extends Controller
     public function store(StoreProjectRequest $request)
     {
         try {
-            $user = User::findOrFail($request->input('data.relationships.author.id'));
+            $user = User::findOrFail($request->input('data.relationships.author.data.id'));
         }
         catch (ModelNotFoundException $exception) {
             return $this->ok('user not found', [
-                'error' => 'provided userid does not exist',
+                'error' => 'provided user id does not exist',
             ]);
         }
+
+        $model = [
+            'title' => $request->input('data.attributes.title'),
+            'feature_image' => $request->input('data.attributes.feature_image'),
+            'description' => $request->input('data.attributes.description'),
+            'tech_stack' => $request->input('data.attributes.tech_stack'),
+            'github_url' => $request->input('data.attributes.github_url'),
+        ];
+
+        return new ProjectResource(Project::create($model));
 
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Project $project)
+    public function show($project_id)
     {
-        return new ProjectResource($project);
+
+        try {
+            $project = Project::findOrFail($project_id);
+
+            if ($this->include('author')) {
+                return new ProjectResource($project->load('user'));
+            }
+
+            return new ProjectResource($project);
+        }
+        catch (ModelNotFoundException $exception) 
+        {
+            return $this->error('Project Not Found', 404);
+        }
     }
 
     /**
@@ -70,8 +96,17 @@ class ProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Project $project)
+    public function destroy($project_id)
     {
-        //
+        try {
+            $project = Project::findOrFail($project_id);
+            $project->delete();
+
+            return $this->ok("Project Banished Project Master!");
+        }
+        catch (ModelNotFoundException $exception) 
+        {
+            return $this->error('Project Not Found', 404);
+        }
     }
 }
